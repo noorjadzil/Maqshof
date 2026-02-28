@@ -304,6 +304,25 @@ function showTab(tabName){
 
 renderSiswa();
 </script>
+<script type="module">
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDQy2X5OcjQLsMK8xU_lhOJ7epJCCs7GKM",
+  authDomain: "maqshof-d5772.firebaseapp.com",
+  projectId: "maqshof-d5772",
+  storageBucket: "maqshof-d5772.firebasestorage.app",
+  messagingSenderId: "1041036087220",
+  appId: "1:1041036087220:web:c57a1260b1e5695de56ce1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.db = db;
+
+</script>
 </body>
 </html>
