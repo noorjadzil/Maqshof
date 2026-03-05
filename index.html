@@ -1,260 +1,224 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Cyber Canteen Terminal Online</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CYBER ABSENSI ONLINE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-body {
-    margin: 0;
-    background: black;
-    overflow: hidden;
-    font-family: monospace;
+
+body{
+margin:0;
+background:black;
+color:#00ff00;
+font-family:monospace;
+overflow:hidden;
 }
 
-#matrix {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: -1;
+#matrix{
+position:fixed;
+top:0;
+left:0;
+z-index:-1;
 }
-body{
-    font-family:monospace;
-    background:black;
-    color:#00ff00;
-    margin:0;
-    padding:10px;
-    overflow-x:hidden;
+
+.container{
+text-align:center;
+padding:20px;
 }
-h2{
-    text-align:center;
-    text-shadow:0 0 10px #00ff00;
-}
+
 .box{
-    border:1px solid #00ff00;
-    padding:15px;
-    margin:15px auto;
-    width:90%;
-    max-width:350px;
-    text-align:center;
+border:1px solid #00ff00;
+padding:20px;
+max-width:350px;
+margin:auto;
 }
-input,select{
-    width:90%;
-    padding:8px;
-    margin:5px 0;
-    background:black;
-    color:#00ff00;
-    border:1px solid #00ff00;
+
+input{
+width:90%;
+padding:10px;
+margin:5px;
+background:black;
+border:1px solid #00ff00;
+color:#00ff00;
 }
+
 button{
-    padding:10px;
-    border:1px solid #00ff00;
-    background:black;
-    color:#00ff00;
-    cursor:pointer;
+padding:10px 20px;
+background:black;
+border:1px solid #00ff00;
+color:#00ff00;
+cursor:pointer;
+margin-top:10px;
 }
-.menu{
-    text-align:center;
+
+img{
+margin-top:10px;
+width:150px;
+border:1px solid #00ff00;
 }
-.menu button{
-    margin:5px;
-}
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:10px;
-}
-th,td{
-    border:1px solid #00ff00;
-    padding:5px;
-    text-align:center;
-}
+
 </style>
 </head>
 
 <body>
+
 <canvas id="matrix"></canvas>
-<h2>CYBER CANTEEN ONLINE</h2>
 
-<div class="menu">
-<button onclick="showTab('siswa')">Database Agent</button>
-<button onclick="showTab('transaksi')">Execute Transaction</button>
-<button onclick="showTab('riwayatTab')">Access Log</button>
+<div class="container">
+
+<h2>CYBER ABSENSI</h2>
+
+<div class="box">
+
+<input type="text" id="nama" placeholder="Nama">
+<input type="text" id="nik" placeholder="NIK">
+
+<br><br>
+
+<input type="file" id="foto" accept="image/*" capture="camera">
+
+<br>
+
+<img id="preview">
+
+<br>
+
+<button onclick="ambilLokasi()">Ambil Lokasi</button>
+
+<p id="lokasi">Lokasi belum diambil</p>
+
+<button onclick="kirim()">KIRIM ABSENSI</button>
+
 </div>
 
-<div class="box" id="siswa">
-<h3>Register Agent</h3>
-<input type="text" id="namaSiswa" placeholder="Agent Name">
-<button onclick="tambahSiswa()">Register</button>
-</div>
-
-<div class="box" id="transaksi" style="display:none;">
-<h3>Execute Transaction</h3>
-<select id="pilihSiswa"></select>
-<input type="text" id="barang" placeholder="Item Code">
-<input type="number" id="harga" placeholder="Unit Value">
-<input type="number" id="jumlah" placeholder="Quantity">
-<button onclick="simpanTransaksi()">Execute</button>
-</div>
-
-<div class="box" id="riwayatTab" style="display:none;">
-<h3>Transaction Log</h3>
-<select id="lihatSiswa" onchange="tampilkanRiwayat()"></select>
-<table>
-<thead>
-<tr>
-<th>Date</th>
-<th>Item</th>
-<th>Price</th>
-<th>Qty</th>
-<th>Total</th>
-</tr>
-</thead>
-<tbody id="riwayat"></tbody>
-</table>
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  getDocs 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDQy2X5OcjQLsMK8xU_lhOJ7epJCCs7GKM",
-  authDomain: "maqshof-d5772.firebaseapp.com",
-  projectId: "maqshof-d5772",
-  storageBucket: "maqshof-d5772.firebasestorage.app",
-  messagingSenderId: "1041036087220",
-  appId: "1:1041036087220:web:c57a1260b1e5695de56ce1"
+apiKey: "ISI_APIKEY",
+authDomain: "ISI_DOMAIN",
+projectId: "ISI_PROJECTID",
+storageBucket: "ISI_STORAGE",
+messagingSenderId: "ISI_ID",
+appId: "ISI_APPID"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.showTab = function(tabName){
-    document.getElementById("siswa").style.display="none";
-    document.getElementById("transaksi").style.display="none";
-    document.getElementById("riwayatTab").style.display="none";
-    document.getElementById(tabName).style.display="block";
-};
+let latitude="";
+let longitude="";
+let fotoBase64="";
 
-window.tambahSiswa = async function(){
-    let nama=document.getElementById("namaSiswa").value;
-    if(!nama) return alert("Enter Agent Name");
+document.getElementById("foto").addEventListener("change",function(e){
 
-    await addDoc(collection(db,"siswa"),{nama});
-    document.getElementById("namaSiswa").value="";
-    loadSiswa();
-    alert("Agent Registered Online");
-};
+let file=e.target.files[0];
+let reader=new FileReader();
 
-async function loadSiswa(){
-    let pilih=document.getElementById("pilihSiswa");
-    let lihat=document.getElementById("lihatSiswa");
-    pilih.innerHTML="";
-    lihat.innerHTML="";
-
-    const querySnapshot=await getDocs(collection(db,"siswa"));
-    querySnapshot.forEach(doc=>{
-        let data=doc.data();
-        pilih.innerHTML+=`<option value="${data.nama}">${data.nama}</option>`;
-        lihat.innerHTML+=`<option value="${data.nama}">${data.nama}</option>`;
-    });
+reader.onload=function(){
+fotoBase64=reader.result;
+document.getElementById("preview").src=fotoBase64;
 }
 
-window.simpanTransaksi = async function(){
-    let nama=document.getElementById("pilihSiswa").value;
-    let barang=document.getElementById("barang").value;
-    let harga=parseInt(document.getElementById("harga").value);
-    let jumlah=parseInt(document.getElementById("jumlah").value);
+reader.readAsDataURL(file);
 
-    if(!nama||!barang||!harga||!jumlah)
-        return alert("Incomplete Data");
-
-    let subtotal=harga*jumlah;
-    let tgl=new Date().toLocaleDateString();
-
-    await addDoc(collection(db,"transaksi"),{
-        nama,tgl,barang,harga,jumlah,subtotal
-    });
-
-    document.getElementById("barang").value="";
-    document.getElementById("harga").value="";
-    document.getElementById("jumlah").value="";
-
-    alert("Transaction Saved Online");
-};
-
-window.tampilkanRiwayat = async function(){
-    let nama=document.getElementById("lihatSiswa").value;
-    let tbody=document.getElementById("riwayat");
-    tbody.innerHTML="";
-
-    const querySnapshot=await getDocs(collection(db,"transaksi"));
-    querySnapshot.forEach(doc=>{
-        let t=doc.data();
-        if(t.nama===nama){
-            tbody.innerHTML+=`
-            <tr>
-            <td>${t.tgl}</td>
-            <td>${t.barang}</td>
-            <td>${t.harga}</td>
-            <td>${t.jumlah}</td>
-            <td>${t.subtotal}</td>
-            </tr>`;
-        }
-    });
-};
-
-loadSiswa();
-
-</script>
-<script>
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
-
-canvas.height = window.innerHeight;
-canvas.width = window.innerWidth;
-
-const letters = "01";
-const fontSize = 14;
-const columns = canvas.width / fontSize;
-
-const drops = [];
-
-for (let x = 0; x < columns; x++) {
-    drops[x] = 1;
-}
-
-function draw() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#00ff00";
-    ctx.font = fontSize + "px monospace";
-
-    for (let i = 0; i < drops.length; i++) {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-            drops[i] = 0;
-        }
-
-        drops[i]++;
-    }
-}
-
-setInterval(draw, 33);
-
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
 });
+
+window.ambilLokasi=function(){
+
+navigator.geolocation.getCurrentPosition(function(pos){
+
+latitude=pos.coords.latitude;
+longitude=pos.coords.longitude;
+
+document.getElementById("lokasi").innerText=
+"Lokasi: "+latitude+" , "+longitude;
+
+});
+
+}
+
+window.kirim=async function(){
+
+let nama=document.getElementById("nama").value;
+let nik=document.getElementById("nik").value;
+
+if(!nama || !nik || !latitude)
+return alert("Lengkapi data dulu");
+
+let waktu=new Date().toLocaleString();
+
+await addDoc(collection(db,"absensi"),{
+
+nama,
+nik,
+waktu,
+latitude,
+longitude,
+foto:fotoBase64
+
+});
+
+alert("ABSENSI BERHASIL");
+
+document.getElementById("nama").value="";
+document.getElementById("nik").value="";
+document.getElementById("preview").src="";
+document.getElementById("lokasi").innerText="Lokasi belum diambil";
+
+}
+
 </script>
+
+<script>
+
+const canvas=document.getElementById("matrix");
+const ctx=canvas.getContext("2d");
+
+canvas.height=window.innerHeight;
+canvas.width=window.innerWidth;
+
+const letters="01";
+const fontSize=14;
+const columns=canvas.width/fontSize;
+
+const drops=[];
+
+for(let x=0;x<columns;x++){
+drops[x]=1;
+}
+
+function draw(){
+
+ctx.fillStyle="rgba(0,0,0,0.05)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+ctx.fillStyle="#00ff00";
+ctx.font=fontSize+"px monospace";
+
+for(let i=0;i<drops.length;i++){
+
+const text=letters.charAt(Math.floor(Math.random()*letters.length));
+
+ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+
+if(drops[i]*fontSize>canvas.height && Math.random()>0.975){
+drops[i]=0;
+}
+
+drops[i]++;
+
+}
+
+}
+
+setInterval(draw,33);
+
+</script>
+
 </body>
 </html>
