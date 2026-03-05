@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>CYBER ABSENSI ONLINE</title>
+<title>CYBER ABSENSI SYSTEM</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -11,7 +12,7 @@ margin:0;
 background:black;
 color:#00ff00;
 font-family:monospace;
-overflow:hidden;
+overflow-x:hidden;
 }
 
 #matrix{
@@ -29,7 +30,7 @@ padding:20px;
 .box{
 border:1px solid #00ff00;
 padding:20px;
-max-width:350px;
+max-width:400px;
 margin:auto;
 }
 
@@ -44,17 +45,28 @@ color:#00ff00;
 
 button{
 padding:10px 20px;
+margin:5px;
 background:black;
 border:1px solid #00ff00;
 color:#00ff00;
 cursor:pointer;
+}
+
+video,canvas{
+width:200px;
+border:1px solid #00ff00;
 margin-top:10px;
 }
 
-img{
-margin-top:10px;
-width:150px;
+table{
+width:100%;
+margin-top:20px;
+border-collapse:collapse;
+}
+
+td,th{
 border:1px solid #00ff00;
+padding:5px;
 }
 
 </style>
@@ -73,13 +85,17 @@ border:1px solid #00ff00;
 <input type="text" id="nama" placeholder="Nama">
 <input type="text" id="nik" placeholder="NIK">
 
-<br><br>
+<br>
 
-<input type="file" id="foto" accept="image/*" capture="camera">
+<video id="kamera" autoplay></video>
 
 <br>
 
-<img id="preview">
+<button onclick="ambilFoto()">Selfie</button>
+
+<br>
+
+<canvas id="foto"></canvas>
 
 <br>
 
@@ -91,20 +107,44 @@ border:1px solid #00ff00;
 
 </div>
 
+<h3>Riwayat Absensi</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>Nama</th>
+<th>NIK</th>
+<th>Waktu</th>
+</tr>
+</thead>
+
+<tbody id="riwayat"></tbody>
+
+</table>
+
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "ISI_APIKEY",
-authDomain: "ISI_DOMAIN",
-projectId: "ISI_PROJECTID",
-storageBucket: "ISI_STORAGE",
-messagingSenderId: "ISI_ID",
-appId: "ISI_APPID"
+
+apiKey: "APIKEY",
+authDomain: "DOMAIN",
+projectId: "PROJECTID",
+storageBucket: "STORAGE",
+messagingSenderId: "ID",
+appId: "APPID"
+
 };
 
 const app = initializeApp(firebaseConfig);
@@ -114,19 +154,27 @@ let latitude="";
 let longitude="";
 let fotoBase64="";
 
-document.getElementById("foto").addEventListener("change",function(e){
+const video=document.getElementById("kamera");
 
-let file=e.target.files[0];
-let reader=new FileReader();
+navigator.mediaDevices.getUserMedia({video:true})
 
-reader.onload=function(){
-fotoBase64=reader.result;
-document.getElementById("preview").src=fotoBase64;
-}
-
-reader.readAsDataURL(file);
-
+.then(stream=>{
+video.srcObject=stream;
 });
+
+window.ambilFoto=function(){
+
+let canvas=document.getElementById("foto");
+let ctx=canvas.getContext("2d");
+
+canvas.width=200;
+canvas.height=150;
+
+ctx.drawImage(video,0,0,200,150);
+
+fotoBase64=canvas.toDataURL();
+
+}
 
 window.ambilLokasi=function(){
 
@@ -148,7 +196,7 @@ let nama=document.getElementById("nama").value;
 let nik=document.getElementById("nik").value;
 
 if(!nama || !nik || !latitude)
-return alert("Lengkapi data dulu");
+return alert("Data belum lengkap");
 
 let waktu=new Date().toLocaleString();
 
@@ -165,12 +213,36 @@ foto:fotoBase64
 
 alert("ABSENSI BERHASIL");
 
-document.getElementById("nama").value="";
-document.getElementById("nik").value="";
-document.getElementById("preview").src="";
-document.getElementById("lokasi").innerText="Lokasi belum diambil";
+loadData();
 
 }
+
+async function loadData(){
+
+let tbody=document.getElementById("riwayat");
+tbody.innerHTML="";
+
+const querySnapshot=await getDocs(collection(db,"absensi"));
+
+querySnapshot.forEach(doc=>{
+
+let d=doc.data();
+
+tbody.innerHTML+=`
+
+<tr>
+<td>${d.nama}</td>
+<td>${d.nik}</td>
+<td>${d.waktu}</td>
+</tr>
+
+`;
+
+});
+
+}
+
+loadData();
 
 </script>
 
