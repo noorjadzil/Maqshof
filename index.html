@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>CYBER ABSENSI SYSTEM</title>
+<title>CYBER ABSENSI</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -29,7 +29,7 @@ padding:20px;
 .box{
 border:1px solid #00ff00;
 padding:20px;
-max-width:400px;
+max-width:350px;
 margin:auto;
 }
 
@@ -51,12 +51,6 @@ color:#00ff00;
 cursor:pointer;
 }
 
-video,canvas{
-width:200px;
-border:1px solid #00ff00;
-margin-top:10px;
-}
-
 table{
 width:100%;
 margin-top:20px;
@@ -70,7 +64,6 @@ padding:5px;
 
 #status{
 margin-top:10px;
-font-weight:bold;
 }
 
 </style>
@@ -88,20 +81,6 @@ font-weight:bold;
 
 <input type="text" id="nama" placeholder="Nama">
 <input type="text" id="nik" placeholder="NIK">
-
-<br>
-
-<video id="kamera" autoplay></video>
-
-<br>
-
-<button onclick="ambilFoto()">Selfie</button>
-
-<br>
-
-<canvas id="foto"></canvas>
-
-<br>
 
 <button onclick="ambilLokasi()">Ambil Lokasi</button>
 
@@ -158,28 +137,6 @@ const db = getFirestore(app);
 
 let latitude="";
 let longitude="";
-let fotoBase64="";
-
-const video=document.getElementById("kamera");
-
-navigator.mediaDevices.getUserMedia({video:true})
-.then(stream=>{
-video.srcObject=stream;
-});
-
-window.ambilFoto=function(){
-
-let canvas=document.getElementById("foto");
-let ctx=canvas.getContext("2d");
-
-canvas.width=150;
-canvas.height=120;
-
-ctx.drawImage(video,0,0,150,120);
-
-fotoBase64=canvas.toDataURL("image/jpeg",0.5);
-
-}
 
 window.ambilLokasi=function(){
 
@@ -203,7 +160,7 @@ let nama=document.getElementById("nama").value;
 let nik=document.getElementById("nik").value;
 
 if(!nama || !nik || !latitude)
-return alert("Data belum lengkap");
+return alert("Lengkapi data");
 
 status.innerText="Mengirim...";
 
@@ -212,35 +169,12 @@ try{
 let waktu=new Date().toLocaleString();
 
 await addDoc(collection(db,"absensi"),{
+
 nama,
 nik,
 waktu,
 latitude,
 longitude
-});
-
-status.innerText="✅ Absensi berhasil";
-
-}
-catch(e){
-
-status.innerText="❌ Gagal mengirim";
-
-}
-
-}
-try{
-
-let waktu=new Date().toLocaleString();
-
-await addDoc(collection(db,"absensi"),{
-
-nama,
-nik,
-waktu,
-latitude,
-longitude,
-foto:fotoBase64
 
 });
 
