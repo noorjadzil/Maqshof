@@ -205,8 +205,30 @@ let nik=document.getElementById("nik").value;
 if(!nama || !nik || !latitude)
 return alert("Data belum lengkap");
 
-status.innerText="Mengirim absensi...";
+status.innerText="Mengirim...";
 
+try{
+
+let waktu=new Date().toLocaleString();
+
+await addDoc(collection(db,"absensi"),{
+nama,
+nik,
+waktu,
+latitude,
+longitude
+});
+
+status.innerText="✅ Absensi berhasil";
+
+}
+catch(e){
+
+status.innerText="❌ Gagal mengirim";
+
+}
+
+}
 try{
 
 let waktu=new Date().toLocaleString();
