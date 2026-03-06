@@ -1,29 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>CYBER ABSENSI</title>
+<title>ABSENSI ONLINE</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 
 body{
-margin:0;
+font-family:monospace;
 background:black;
 color:#00ff00;
-font-family:monospace;
-overflow-x:hidden;
-}
-
-#matrix{
-position:fixed;
-top:0;
-left:0;
-z-index:-1;
-}
-
-.container{
 text-align:center;
-padding:20px;
 }
 
 .box{
@@ -38,16 +26,16 @@ width:90%;
 padding:10px;
 margin:5px;
 background:black;
-border:1px solid #00ff00;
 color:#00ff00;
+border:1px solid #00ff00;
 }
 
 button{
-padding:10px 20px;
+padding:10px;
 margin:5px;
 background:black;
-border:1px solid #00ff00;
 color:#00ff00;
+border:1px solid #00ff00;
 cursor:pointer;
 }
 
@@ -62,53 +50,49 @@ border:1px solid #00ff00;
 padding:5px;
 }
 
-#status{
-margin-top:10px;
-}
-
 </style>
+
 </head>
 
 <body>
 
-<canvas id="matrix"></canvas>
-
-<div class="container">
-
-<h2>CYBER ABSENSI</h2>
+<h2>SISTEM ABSENSI</h2>
 
 <div class="box">
 
-<input type="text" id="nama" placeholder="Nama">
-<input type="text" id="nik" placeholder="NIK">
+<input id="nama" placeholder="Nama">
+
+<input id="nik" placeholder="NIK">
 
 <button onclick="ambilLokasi()">Ambil Lokasi</button>
 
 <p id="lokasi">Lokasi belum diambil</p>
 
-<button onclick="kirim()">KIRIM ABSENSI</button>
+<button onclick="kirim()">Kirim Absensi</button>
 
 <p id="status"></p>
 
 </div>
 
-<h3>Riwayat Absensi</h3>
+<br>
+
+<button onclick="lihatRiwayat()">Lihat Riwayat</button>
 
 <table>
 
 <thead>
+
 <tr>
 <th>Nama</th>
 <th>NIK</th>
 <th>Waktu</th>
 </tr>
+
 </thead>
 
 <tbody id="riwayat"></tbody>
 
 </table>
-
-</div>
 
 <script type="module">
 
@@ -118,22 +102,24 @@ import {
 getFirestore,
 collection,
 addDoc,
-getDocs
+getDocs,
+query,
+limit
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
+const firebaseConfig={
 
-apiKey: "APIKEY",
-authDomain: "DOMAIN",
-projectId: "PROJECTID",
-storageBucket: "STORAGE",
-messagingSenderId: "ID",
-appId: "APPID"
+apiKey:"APIKEY",
+authDomain:"DOMAIN",
+projectId:"PROJECTID",
+storageBucket:"STORAGE",
+messagingSenderId:"ID",
+appId:"APPID"
 
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
 let latitude="";
 let longitude="";
@@ -154,49 +140,39 @@ document.getElementById("lokasi").innerText=
 
 window.kirim=async function(){
 
-let status=document.getElementById("status");
-
 let nama=document.getElementById("nama").value;
 let nik=document.getElementById("nik").value;
 
 if(!nama || !nik || !latitude)
 return alert("Lengkapi data");
 
-status.innerText="Mengirim...";
-
-try{
-
-let waktu=new Date().toLocaleString();
+document.getElementById("status").innerText="Mengirim...";
 
 await addDoc(collection(db,"absensi"),{
 
 nama,
 nik,
-waktu,
+waktu:new Date().toLocaleString(),
 latitude,
 longitude
 
 });
 
-status.innerText="✅ Absensi berhasil";
-
-loadData();
-
-}
-catch(e){
-
-status.innerText="❌ Gagal mengirim";
+document.getElementById("status").innerText="✅ Berhasil";
 
 }
 
-}
-
-async function loadData(){
+window.lihatRiwayat=async function(){
 
 let tbody=document.getElementById("riwayat");
-tbody.innerHTML="";
 
-const querySnapshot=await getDocs(collection(db,"absensi"));
+tbody.innerHTML="Loading...";
+
+const q=query(collection(db,"absensi"),limit(20));
+
+const querySnapshot=await getDocs(q);
+
+tbody.innerHTML="";
 
 querySnapshot.forEach(doc=>{
 
@@ -205,9 +181,13 @@ let d=doc.data();
 tbody.innerHTML+=`
 
 <tr>
+
 <td>${d.nama}</td>
+
 <td>${d.nik}</td>
+
 <td>${d.waktu}</td>
+
 </tr>
 
 `;
@@ -216,55 +196,8 @@ tbody.innerHTML+=`
 
 }
 
-loadData();
-
-</script>
-
-<script>
-
-const canvas=document.getElementById("matrix");
-const ctx=canvas.getContext("2d");
-
-canvas.height=window.innerHeight;
-canvas.width=window.innerWidth;
-
-const letters="01";
-const fontSize=14;
-const columns=canvas.width/fontSize;
-
-const drops=[];
-
-for(let x=0;x<columns;x++){
-drops[x]=1;
-}
-
-function draw(){
-
-ctx.fillStyle="rgba(0,0,0,0.05)";
-ctx.fillRect(0,0,canvas.width,canvas.height);
-
-ctx.fillStyle="#00ff00";
-ctx.font=fontSize+"px monospace";
-
-for(let i=0;i<drops.length;i++){
-
-const text=letters.charAt(Math.floor(Math.random()*letters.length));
-
-ctx.fillText(text,i*fontSize,drops[i]*fontSize);
-
-if(drops[i]*fontSize>canvas.height && Math.random()>0.975){
-drops[i]=0;
-}
-
-drops[i]++;
-
-}
-
-}
-
-setInterval(draw,33);
-
 </script>
 
 </body>
+
 </html>
