@@ -1,203 +1,157 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>ABSENSI ONLINE</title>
-
+<title>Laporan Jajan</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-
 body{
-font-family:monospace;
-background:black;
-color:#00ff00;
-text-align:center;
+font-family:'Segoe UI',Arial;
+margin:0;
+background:linear-gradient(135deg,#0f172a,#1e3a8a);
 }
 
-.box{
-border:1px solid #00ff00;
-padding:20px;
-max-width:350px;
+.container{
+max-width:420px;
 margin:auto;
-}
-
-input{
-width:90%;
 padding:10px;
-margin:5px;
-background:black;
-color:#00ff00;
-border:1px solid #00ff00;
 }
 
-button{
-padding:10px;
-margin:5px;
-background:black;
-color:#00ff00;
-border:1px solid #00ff00;
-cursor:pointer;
+.card{
+background:white;
+border-radius:16px;
+padding:15px;
+box-shadow:0 8px 20px rgba(0,0,0,0.2);
 }
 
-table{
+h2{
+text-align:center;
+color:#1e3a8a;
+}
+
+.laporan-card{
+background:white;
+margin-top:12px;
+padding:12px;
+border-radius:12px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.laporan-header{
+font-size:18px;
+font-weight:700;
+color:#1e3a8a;
+margin-bottom:6px;
+}
+
+.laporan-tanggal{
+display:inline-block;
+background:#e0edff;
+color:#1e3a8a;
+padding:4px 10px;
+border-radius:8px;
+font-size:14px;
+font-weight:700;
+margin-bottom:8px;
+}
+
+.laporan-items{
+margin-top:6px;
+line-height:1.5;
+font-weight:600;
+}
+
+img{
 width:100%;
-margin-top:20px;
-border-collapse:collapse;
+border-radius:10px;
+margin-top:8px;
 }
-
-td,th{
-border:1px solid #00ff00;
-padding:5px;
-}
-
 </style>
-
 </head>
 
 <body>
 
-<h2>SISTEM ABSENSI</h2>
+<div class="container">
+<div class="card">
 
-<div class="box">
+<h2>Laporan Jajan</h2>
 
-<input id="nama" placeholder="Nama">
-
-<input id="nik" placeholder="NIK">
-
-<button onclick="ambilLokasi()">Ambil Lokasi</button>
-
-<p id="lokasi">Lokasi belum diambil</p>
-
-<button onclick="kirim()">Kirim Absensi</button>
-
-<p id="status"></p>
+<div id="listLaporan">Loading...</div>
 
 </div>
+</div>
 
-<br>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
-<button onclick="lihatRiwayat()">Lihat Riwayat</button>
-
-<table>
-
-<thead>
-
-<tr>
-<th>Nama</th>
-<th>NIK</th>
-<th>Waktu</th>
-</tr>
-
-</thead>
-
-<tbody id="riwayat"></tbody>
-
-</table>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-
-import {
-getFirestore,
-collection,
-addDoc,
-getDocs,
-query,
-limit
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+<script>
 const firebaseConfig={
-
-apiKey:"APIKEY",
-authDomain:"DOMAIN",
-projectId:"PROJECTID",
-storageBucket:"STORAGE",
-messagingSenderId:"ID",
-appId:"APPID"
-
+apiKey:"AIzaSyAIEhd42LiAEu7CzsnTXubQdxH1dzu1nyQ",
+authDomain:"cilok-86ced.firebaseapp.com",
+databaseURL:"https://cilok-86ced-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId:"cilok-86ced",
+storageBucket:"cilok-86ced.firebasestorage.app",
+messagingSenderId:"1038629771281",
+appId:"1:1038629771281:web:45d56ba73acaf6613a79b0"
 };
 
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
 
-let latitude="";
-let longitude="";
+// FORMAT TANGGAL
+function formatTanggal(waktu){
+let date = new Date(waktu);
 
-window.ambilLokasi=function(){
+let hari = date.toLocaleDateString("id-ID",{weekday:"long"});
+let tanggal = date.toLocaleDateString("id-ID",{day:"numeric", month:"long", year:"numeric"});
+let jam = date.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});
 
-navigator.geolocation.getCurrentPosition(function(pos){
-
-latitude=pos.coords.latitude;
-longitude=pos.coords.longitude;
-
-document.getElementById("lokasi").innerText=
-"Lokasi: "+latitude+" , "+longitude;
-
-});
-
+return `${hari}, ${tanggal} - ${jam}`;
 }
 
-window.kirim=async function(){
+// LOAD LAPORAN
+function loadLaporan(){
 
-let nama=document.getElementById("nama").value;
-let nik=document.getElementById("nik").value;
+let list=document.getElementById("listLaporan");
+list.innerHTML="Loading...";
 
-if(!nama || !nik || !latitude)
-return alert("Lengkapi data");
+db.ref("jajan").limitToLast(50).once("value",snap=>{
 
-document.getElementById("status").innerText="Mengirim...";
+list.innerHTML="";
 
-await addDoc(collection(db,"absensi"),{
-
-nama,
-nik,
-waktu:new Date().toLocaleString(),
-latitude,
-longitude
-
-});
-
-document.getElementById("status").innerText="✅ Berhasil";
-
+if(!snap.val()){
+list.innerHTML="Belum ada data";
+return;
 }
 
-window.lihatRiwayat=async function(){
+let arr=Object.values(snap.val()).reverse();
 
-let tbody=document.getElementById("riwayat");
+arr.forEach(d=>{
 
-tbody.innerHTML="Loading...";
+let items = (d.items || [])
+.map(i=>`• ${i.barang} (${i.jumlah})`)
+.join("<br>");
 
-const q=query(collection(db,"absensi"),limit(20));
+let div=document.createElement("div");
+div.className="laporan-card";
 
-const querySnapshot=await getDocs(q);
-
-tbody.innerHTML="";
-
-querySnapshot.forEach(doc=>{
-
-let d=doc.data();
-
-tbody.innerHTML+=`
-
-<tr>
-
-<td>${d.nama}</td>
-
-<td>${d.nik}</td>
-
-<td>${d.waktu}</td>
-
-</tr>
-
+div.innerHTML=`
+<div class="laporan-header">${d.jenis} - ${d.tempat}</div>
+<div class="laporan-tanggal">${formatTanggal(d.waktu)}</div>
+<div class="laporan-items">${items}</div>
+${d.foto ? `<img src="${d.foto}">` : ""}
 `;
 
+list.appendChild(div);
+
+});
+
 });
 
 }
 
+loadLaporan();
 </script>
 
 </body>
-
 </html>
