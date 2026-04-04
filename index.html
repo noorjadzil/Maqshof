@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Laporan Jajan</title>
+<title>Laporan Maqshof</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -50,7 +50,7 @@ background:#e0edff;
 color:#1e3a8a;
 padding:4px 10px;
 border-radius:8px;
-font-size:14px;
+font-size:16px;
 font-weight:700;
 margin-bottom:8px;
 }
@@ -74,31 +74,13 @@ margin-top:8px;
 <div class="container">
 <div class="card">
 
-<h2>Laporan Jajan</h2>
-
+<h2>Laporan</h2>
 <div id="listLaporan">Loading...</div>
 
 </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
 <script>
-const firebaseConfig={
-apiKey:"AIzaSyAIEhd42LiAEu7CzsnTXubQdxH1dzu1nyQ",
-authDomain:"cilok-86ced.firebaseapp.com",
-databaseURL:"https://cilok-86ced-default-rtdb.asia-southeast1.firebasedatabase.app",
-projectId:"cilok-86ced",
-storageBucket:"cilok-86ced.firebasestorage.app",
-messagingSenderId:"1038629771281",
-appId:"1:1038629771281:web:45d56ba73acaf6613a79b0"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
-
-// FORMAT TANGGAL
 function formatTanggal(waktu){
 let date = new Date(waktu);
 
@@ -109,7 +91,6 @@ let jam = date.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});
 return `${hari}, ${tanggal} - ${jam}`;
 }
 
-// LOAD LAPORAN
 function loadLaporan(){
 
 let list=document.getElementById("listLaporan");
@@ -128,9 +109,10 @@ let arr=Object.values(snap.val()).reverse();
 
 arr.forEach(d=>{
 
-let items = (d.items || [])
-.map(i=>`• ${i.barang} (${i.jumlah})`)
-.join("<br>");
+let items="";
+if(d.items){
+items = d.items.map(i=>`• ${i.barang} (${i.jumlah})`).join("<br>");
+}
 
 let div=document.createElement("div");
 div.className="laporan-card";
@@ -139,7 +121,14 @@ div.innerHTML=`
 <div class="laporan-header">${d.jenis} - ${d.tempat}</div>
 <div class="laporan-tanggal">${formatTanggal(d.waktu)}</div>
 <div class="laporan-items">${items}</div>
-${d.foto ? `<img src="${d.foto}">` : ""}
+
+${d.catatan ? `
+<div style="margin-top:8px;font-weight:700;color:#dc2626">
+Catatan: ${d.catatan}
+</div>
+` : ""}
+
+${d.foto?`<img src="${d.foto}">`:""}
 `;
 
 list.appendChild(div);
@@ -147,10 +136,27 @@ list.appendChild(div);
 });
 
 });
-
 }
 
 loadLaporan();
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig={
+apiKey:"AIzaSyAIEhd42LiAEu7CzsnTXubQdxH1dzu1nyQ",
+authDomain:"cilok-86ced.firebaseapp.com",
+databaseURL:"https://cilok-86ced-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId:"cilok-86ced",
+storageBucket:"cilok-86ced.firebasestorage.app",
+messagingSenderId:"1038629771281",
+appId:"1:1038629771281:web:45d56ba73acaf6613a79b0"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
 </script>
 
 </body>
