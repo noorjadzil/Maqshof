@@ -1,0 +1,21 @@
+{
+  "name": "Laporan Jajan",
+  "short_name": "Jajan",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a8a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "498x375",
+      "type": "image/png"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "498x375",
+      "type": "image/png"
+    }
+  ]
+}
