@@ -223,17 +223,18 @@ margin-top:-2px;
 }
 
 .item-list{
-display:flex;
-justify-content:space-between;
+display:grid;
+grid-template-columns:1fr auto;
 align-items:center;
-padding:7px 0;
-border-bottom:1px solid rgba(255,255,255,0.05);
+padding:10px 0;
+border-bottom:1px solid rgba(255,255,255,.06);
+gap:16px;
 }
-
 .item-left{
 display:flex;
 align-items:center;
 gap:10px;
+justify-self:start;
 }
 
 .item-dot{
@@ -251,15 +252,15 @@ color:#f8fafc;
 }
 
 .item-jumlah{
-min-width:44px;
-padding:7px 12px;
-border-radius:999px;
-text-align:center;
-font-size:13px;
+width:90px;
+justify-self:end;
+text-align:right;
 font-weight:900;
-background:rgba(255,255,255,0.08);
-border:1px solid rgba(255,255,255,0.08);
-color:#ffffff;
+font-variant-numeric:tabular-nums;
+padding:6px 0;
+background:none;
+border:none;
+color:#fff;
 }
 
 .note-box{
@@ -479,8 +480,6 @@ h2{font-size:28px}
 
 <h2>Laporan Jajan</h2>
 
-<button onclick="kembali()" class="main-btn">⬅️ Kembali ke Input</button>
-
 <div class="tab-wrap">
 <button id="btnLaporan" class="tab-btn active" onclick="showTab('laporan')">📋 Laporan</button>
 <button id="btnRekap" class="tab-btn nonactive" onclick="showTab('rekap')">📊 Rekap</button>
@@ -557,7 +556,8 @@ setTimeout(()=>{t.style.display="none"},2200);
 
 function formatTanggal(waktu){
 let date=new Date(waktu);
-let hari=date.toLocaleDateString("id-ID",{weekday:"long"});
+const hariMap={'Sunday':'Ahad','Monday':'Senin','Tuesday':'Selasa','Wednesday':'Rabu','Thursday':'Kamis','Friday':'Jumat','Saturday':'Sabtu'};
+let hari=hariMap[date.toLocaleDateString('en-US',{weekday:'long'})];
 let tanggal=date.toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"});
 let jam=date.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});
 return `${hari} • ${tanggal} • ${jam}`;
@@ -565,7 +565,16 @@ return `${hari} • ${tanggal} • ${jam}`;
 
 function formatTanggalHari(waktu){
 let date=new Date(waktu);
-let hari=date.toLocaleDateString("id-ID",{weekday:"long"});
+const hariMap={
+'Sunday':'Ahad',
+'Monday':'Senin',
+'Tuesday':'Selasa',
+'Wednesday':'Rabu',
+'Thursday':'Kamis',
+'Friday':'Jumat',
+'Saturday':'Sabtu'
+};
+let hari=hariMap[date.toLocaleDateString('en-US',{weekday:'long'})];
 let tanggal=date.toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"});
 return `${hari}, ${tanggal}`;
 }
@@ -661,12 +670,7 @@ div.innerHTML=`
 <div class="judul">${d.jenis} • ${d.tempat}</div>
 ${d.riwayatEdit ? `<div class="edited">EDITED</div>` : ""}
 </div>
-
-<div class="action-wrap">
-<div class="edit-btn" onclick="toggleEdit('${d.key}')">✏️</div>
-<div class="delete-btn" onclick="openDeleteModal('${d.key}')">🗑️</div>
-</div>
-</div>
+</div></div>
 
 <div class="laporan-tanggal">
 <div class="date-dot"></div>
@@ -675,7 +679,7 @@ ${d.riwayatEdit ? `<div class="edited">EDITED</div>` : ""}
 
 <div class="laporan-items">${items}</div>
 
-<div id="edit-${d.key}" style="display:none"></div>
+
 
 ${d.catatan ? `<div class="note-box">📝 ${d.catatan}</div>` : ""}
 ${d.foto ? `<img src="${d.foto}">` : ""}
@@ -798,12 +802,12 @@ div.innerHTML=`
 </div>
 
 <div class="laporan-items">
-<div class="item-list"><div class="item-name">Masuk Ikhwan</div><div class="item-jumlah">${g.masukIkhwan}</div></div>
-<div class="item-list"><div class="item-name">Masuk Akhwat</div><div class="item-jumlah">${g.masukAkhwat}</div></div>
-<div class="item-list"><div class="item-name">Sisa Ikhwan</div><div class="item-jumlah">${g.sisaIkhwan}</div></div>
-<div class="item-list"><div class="item-name">Sisa Akhwat</div><div class="item-jumlah">${g.sisaAkhwat}</div></div>
-<div class="item-list"><div class="item-name">Terjual</div><div class="item-jumlah">${terjual}</div></div>
-<div class="item-list"><div class="item-name">Total</div><div class="item-jumlah">Rp ${g.totalUang.toLocaleString("id-ID")}</div></div>
+<div class="item-list"><div class="item-left"><div class="item-name">Masuk Ikhwan</div></div><div class="item-jumlah">${g.masukIkhwan}</div></div>
+<div class="item-list"><div class="item-left"><div class="item-name">Masuk Akhwat</div></div><div class="item-jumlah">${g.masukAkhwat}</div></div>
+<div class="item-list"><div class="item-left"><div class="item-name">Sisa Ikhwan</div></div><div class="item-jumlah">${g.sisaIkhwan}</div></div>
+<div class="item-list"><div class="item-left"><div class="item-name">Sisa Akhwat</div></div><div class="item-jumlah">${g.sisaAkhwat}</div></div>
+<div class="item-list"><div class="item-left"><div class="item-name">Terjual</div></div><div class="item-jumlah">${terjual}</div></div>
+<div class="item-list"><div class="item-left"><div class="item-name">Total</div></div><div class="item-jumlah">Rp ${g.totalUang.toLocaleString("id-ID")}</div></div>
 </div>
 `;
 
