@@ -763,6 +763,15 @@ const itemKhusus=[
 const filteredItems=(d.items || [])
 .filter(i=>{
 const nama=(i.barang||"").toLowerCase().trim();
+const kategori=(i.kategori||"").toLowerCase();
+
+if(kategori.includes("es")) return false;
+if(kategori.includes("snack")) return false;
+if(kategori.includes("jajanan")) return false;
+if(kategori.includes("mie ayam")) return false;
+if(kategori.includes("bakso")) return false;
+if(kategori.includes("terang bulan")) return false;
+
 return !itemKhusus.includes(nama);
 });
 
@@ -872,6 +881,14 @@ const itemKhusus=[
 
 (d.items || []).forEach(i=>{
 let nama=(i.barang || "").toLowerCase().trim();
+let kategori=(i.kategori || "").toLowerCase();
+
+if(kategori.includes("es")) return;
+if(kategori.includes("snack")) return;
+if(kategori.includes("jajanan")) return;
+if(kategori.includes("mie ayam")) return;
+if(kategori.includes("bakso")) return;
+if(kategori.includes("terang bulan")) return;
 
 if(itemKhusus.includes(nama)) return;
 
