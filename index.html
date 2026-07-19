@@ -298,7 +298,8 @@ color:#f8fafc;
 }
 
 .item-jumlah{
-width:90px;
+min-width:120px;
+width:auto;
 justify-self:end;
 text-align:right;
 font-weight:900;
@@ -776,7 +777,7 @@ if(kategori.includes("terang bulan")) return false;
 return !itemKhusus.includes(nama);
 });
 
-if(filteredItems.length===0){
+if(filteredItems.length===0 && !(d.catatan || d.foto)){
 return;
 }
 
